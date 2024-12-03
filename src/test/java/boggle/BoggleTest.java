@@ -1,0 +1,614 @@
+package boggle;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import tree.LexicographicTree;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+public class BoggleTest {
+	private static final String DICTIONARY = "src/main/resources/mots/dictionnaire_FR_sans_accents.txt";
+
+	private static final Set<String> EXPECTED_WORDS = new HashSet<>(
+			Arrays.asList(new String[] { "ces", "cesse", "cessent", "cresson", "ego", "encre", "encres", "engonce",
+					"engoncer", "engonces", "esse", "gens", "gent", "gesse", "gnose", "gosse", "nes", "net", "nos",
+					"once", "onces", "ose", "osent", "pre", "pres", "presse", "pressent", "ressent", "sec", "secs",
+					"sen", "sent", "set", "son", "songe", "songent", "sons", "tenson", "tensons", "tes" }));
+	private static final String GRID_LETTERS = "rhreypcswnsntego";
+	private static LexicographicTree dictionary = null;
+	String grid10x10 = "eymmccsrltjttsdiraoarliuniepeousrcgoiseerreeistiedtomcteevcmkaualilaretneerectresieenspgizeoeceecuds";
+	String grid50x50 = "eymmccsrltjttsdiraoarliuniepeousrcgoiseerreeistiedtomcteevcmkaualilaretneerectresieenspgizeoeceecudsrrsrvfianrsicwtdieioeiufnidlaaeeoeieitmntleavieacalischvzeatuisiupatolauaernetasatttadvtthzraaneuzfpneenabiielhcnitesaouelsenxrtojlcastieklkrupeletaiztleapqgaeocbpteutnetrtozatluuarapepsvipesxolteatmylttumelctahsowlsadoelouamisparejpmuaasoaeszsuilubrdrannyosfewnolneudpatcrwatblttpensaaunvkslrekiittciivsomuestiurfuaxreeunuennetemubenanvsucimozentlvptnsoyaoatospesvaesasyysdlbdoraguhpleonvfrelentickiwzrnmimsaeimralovhetscejsdsnrtcsgporubtewesdklorlvteselauxieusieetfmiplllneuyprlpiiujiewverneussnnaxoaswclermderupyurmaareuescriqesbeeadldnlhtsnaucxeadstciqneeetcwtctcltavxgiiuorlomewbleeaoanrjeqeaqhzetmamisirasceranivleteeuaedeaatnsostwtbtonuasilsodhxsmnetecuoesepmotlndamvdcaeebiualneltdrtnwgerifterpepdetdbgollulneoynesonnrpesaustieundaevansmspaisinusitiaagrhoaeeewotnlagtlinjdssnocmeigvultkamnarvcloohslgiueawnyterddduepeislsmaemaiensuytiraesliehotcmaeoeovtsoiostialfertapbuptefeeleeonkeeectcdtneuidrlrpeenmeauvztltsetaeidlsrgscvlsenmetyeoueqesassooiajprrsytioqesugwvatixluutotimwlpesreeicylreeeseauueeeeapornntulivlonansipvoeeactiuecmeudnenrqaieordhluomrtsrmetetswlieqcmltslvsadeuspglmyruteoixiuoepdnectntentdaualdpcsoaeljvonkeftneiuedeeztsatencaectoeptluatriocdocrdtmudleueornptmeintlzejaaaneeradibraeaoaanpoisieeurtettrxvtneoegleltagkasosrastluadxsepnlsaadoaiepjswyedatmrsnivmriseaweinvatepciuuesssnllsssmixlesiedettssyoeuipwltetitececoieeozweaenmlaoroospptusidpkdvsrnqaajituspuuleiisheiogeinpbbsitbsvetofsncnaetaowooekmuntavroonjraduuacknoqqknnnrjoopeeofzdyseaoltsclvaaapiueceauofcdbntmxtneetpoitwiinfaeltgueeispzeacneqmviaiusaettplhiuaetqaewtfuuipoueuesnsoxaixaeeyavqllssqareessnmeolsetlvttbpbeoosesiuincpnersriiterrincnhsemaunvaseeueprldkiecnwtisultmmenensaojgidntetselyzagtctaisiraipzegeienjreosuuszuynlnpooesurddauuuitnouspiiuaeeqerelumdalnohdhueuuiiaiaaltlunnsnamleoprecysucviuirsatenctssjeniinreuenvirsntrwzntaeeieouapntlmayotrpsuunnuiptsxaevplkmuruasocuimontijceksmaeaaearurosaeitpimvtityevsualpsosallkkimiaaievplozjirncedcismssamnerotsprnltlhfiokolroleeaejexjslihseaoelqnsrwizluirhuraarefssdsealtkuediqtdpwekselinealineozeremtjandnrerracqoakiltrcsnwataavalommuslrdqawqpcneaiotajsaiedrkoxtasfyvermeyrnaibrdeiixlefsesvsqrlobkatcptiuxpmvanohcedlemkgevsuoexjjmenoteatptylewesoeotzbveiugseaswoeueoirpupdpulsidsiosueeealdepeltuwssipsecinicloeantylscemtsbairodutathtceeutmrsiarnptamasrrildiuwntaisaatculursrgeierrheeiteacuroruyfretvcxegadiiunguenunubreuflnccretdeetwmdunttrosyntooieeeutvenra";
+	private static Boggle boggle4X4;
+	
+	@BeforeAll
+	public static void initTestDictionary() {
+		dictionary = new LexicographicTree(DICTIONARY);
+		boggle4X4 = new Boggle(4, GRID_LETTERS, dictionary);
+	}
+
+	@Test
+	void wikipediaExample() {
+		Boggle b = new Boggle(4, GRID_LETTERS, dictionary);
+		assertNotNull(b);
+		assertEquals(GRID_LETTERS, b.letters());
+		assertTrue(b.contains("songent"));
+		assertFalse(b.contains("sono"));
+		assertEquals(EXPECTED_WORDS.size(), b.solve().size());
+	}
+
+	@Test
+	void containsWords() {
+		LexicographicTree dict = new LexicographicTree();
+		dict.insertWord("aux");
+		dict.insertWord("aura");
+		dict.insertWord("au");
+		dict.insertWord("as");
+		dict.insertWord("dure");
+		Boggle b = new Boggle(3, "asxduavre", dict);
+
+		assertTrue(b.contains("aux"));
+		assertTrue(b.contains("aura"));
+		assertTrue(b.contains("au"));
+		assertTrue(b.contains("as"));
+		assertTrue(b.contains("dure"));
+
+		assertFalse(b.contains("auxe"));
+		assertFalse(b.contains("aurar"));
+		assertFalse(b.contains("ada"));
+		assertFalse(b.contains("ase"));
+		assertFalse(b.contains("dures"));
+		assertFalse(b.contains("asas"));
+	}
+
+	@Test
+	void solve4x4() {
+		LexicographicTree dict = new LexicographicTree();
+		dict.insertWord("sega");
+		dict.insertWord("sage");
+		Boggle b = new Boggle(2, "sgea", dict);
+
+		assertTrue(b.contains("sage"));
+		assertTrue(b.contains("sega"));
+
+		// solve
+		assertEquals(new TreeSet<String>(Arrays.asList("sega", "sage")), b.solve());
+
+		assertEquals("s g\ne a\n", b.toString());
+	}
+
+	@Test
+	void solve2x2() {
+		LexicographicTree dict = new LexicographicTree();
+		dict.insertWord("art");
+		dict.insertWord("rate");
+		dict.insertWord("rat");
+		Boggle b = new Boggle(2, "arte", dict);
+
+		assertTrue(b.contains("art"));
+		assertTrue(b.contains("rat"));
+		assertTrue(b.contains("rate"));
+
+		assertFalse(b.contains("rar"));
+
+		assertEquals(new TreeSet<String>(Arrays.asList("art", "rat", "rate")), b.solve());
+
+		assertEquals("a r\nt e\n", b.toString());
+	}
+
+	@Test
+	void solve4x4English() { // 3236 loop
+		List<String> expected = Arrays.asList("ees", "eess", "ere", "eres", "erg", "ert", "erusse", "erusser",
+				"erustes", "esn", "ess", "est", "esu", "ets", "eue", "eues", "eur", "eure", "eus", "eusse", "eut",
+				"eutes", "eutm", "fee", "feer", "fees", "fer", "feret", "ferets", "fert", "feru", "ferue", "ferues",
+				"ferus", "fes", "fessu", "fessue", "fessy", "fet", "fetu", "fetus", "feu", "feue", "feues", "feur",
+				"feure", "feurer", "feures", "feus", "feutre", "feutrer", "feutres", "fre", "free", "frere", "freres",
+				"fressure", "fret", "frets", "freusse", "freusser", "fse", "fss", "gre", "gree", "greer", "grees",
+				"gref", "gres", "gress", "gressy", "gru", "grue", "gruee", "gruees", "gruer", "grues", "grusse",
+				"grust", "grute", "grutee", "gruter", "grutes", "gtr", "gtt", "gue", "guee", "gueer", "guees", "guer",
+				"guere", "gueres", "gueret", "guerets", "gues", "guess", "guet", "guets", "guett", "gur", "gus", "guse",
+				"guses", "guss", "gusse", "guster", "gut", "guts", "gutte", "guy", "mss", "mst", "mts", "mtu", "mys",
+				"myste", "mystere", "mystes", "myt", "myure", "myures", "nsf", "nsu", "ree", "reer", "rees", "reest",
+				"reet", "ref", "refre", "refs", "rer", "rerue", "rerues", "res", "ressu", "ressue", "ressuer", "ressut",
+				"rest", "resu", "resue", "resuer", "resure", "resut", "ret", "rets", "retu", "retue", "retuer", "retus",
+				"retut", "rety", "reu", "reus", "reuse", "reuser", "reuses", "reuss", "reusse", "reut", "reute",
+				"reuter", "rtg", "rtt", "rue", "ruee", "ruees", "ruer", "rues", "rug", "rus", "ruse", "rusee", "ruser",
+				"ruses", "russ", "russe", "russy", "rust", "rut", "rute", "ruts", "rutter", "ruy", "see", "ser", "sere",
+				"serf", "serfs", "sert", "ses", "sestu", "sesue", "set", "sets", "seu", "seur", "seurer", "smts", "sns",
+				"sse", "ssf", "sss", "ssss", "sst", "ssu", "ste", "stere", "sterer", "stert", "stes", "stm", "sts",
+				"stuer", "sue", "suee", "suees", "suer", "sues", "suet", "suets", "sur", "sure", "sures", "suret",
+				"surets", "sut", "sutes", "suttee", "tee", "tef", "tefs", "ter", "terf", "terfs", "tergu", "tes",
+				"tessure", "teu", "teug", "tms", "tre", "tref", "trefe", "trefes", "trefs", "tres", "tressue",
+				"tressuer", "trest", "trests", "trets", "treu", "trg", "tru", "truss", "trust", "truste", "trustee",
+				"truster", "trustes", "trusts", "trut", "trute", "truter", "trutes", "tse", "tsf", "tsm", "tss", "tsss",
+				"tsu", "tte", "ttm", "ttr", "tts", "ttu", "tue", "tuee", "tuees", "tuer", "tues", "tug", "tur", "tus",
+				"tuss", "tusse", "tust", "tuste", "tustee", "tuster", "tustes", "tusts", "tut", "tute", "tuter",
+				"tutes", "tuy", "tuysse", "tuyssee", "tuysser", "tuysses", "uee", "uess", "ure", "uree", "urees",
+				"ures", "urt", "use", "usee", "user", "uses", "usn", "uss", "usse", "ussy", "uster", "ute", "utes",
+				"utm", "utr", "uts", "utt", "ymt", "yss", "ytres", "yue", "yues", "yug", "yur", "yuste", "yut");
+		LexicographicTree dict = new LexicographicTree();
+		for (String string : expected) {
+			dict.insertWord(string);
+		}
+		Boggle b = new Boggle(4, "mssnytsstuefgrer", dict);
+
+		for (String string : expected) {
+			assertTrue(b.contains(string));
+		}
+
+		assertEquals(new TreeSet<String>(expected), b.solve());
+
+		assertEquals("m s s n\ny t s s\nt u e f\ng r e r\n", b.toString());
+	}
+
+	@Test
+	void incorrectFields() {
+		LexicographicTree dict = new LexicographicTree();
+		// size not corresponding to the square of word length
+		assertThrows(IllegalArgumentException.class, () -> {
+			new Boggle(3, "arte", dict);
+		});
+		// size less than 0
+		assertThrows(IllegalArgumentException.class, () -> {
+			new Boggle(0, "arte", dict);
+		});
+		assertThrows(IllegalArgumentException.class, () -> {
+			new Boggle(0, dict);
+		});
+		// not throw
+		assertDoesNotThrow(() -> {
+			new Boggle(1, "a", dict);
+		});
+		new Boggle(1, dict);
+		assertDoesNotThrow(() -> {
+			new Boggle(1, dict);
+		});
+	}
+
+	// CONSTRUCTOR \\
+
+	@Test
+	public void constructorWithInvalidSize() {
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(0, GRID_LETTERS, dictionary));
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(-1, GRID_LETTERS, dictionary));
+	}
+
+	@Test
+	public void constructorWithInvalidLetters() {
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(5, "5dfc8", dictionary));
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(5, null, dictionary));
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(5, "", dictionary));
+	}
+
+	@Test
+	public void constructorWithIncoherentParams() {
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(2, "fde", dictionary));
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(3, "abcd", dictionary));
+	}
+
+	@Test
+	public void constructorValid() {
+		assertDoesNotThrow(() -> new Boggle(2, "fdje", dictionary));
+		assertDoesNotThrow(() -> new Boggle(4, "abcdabcdabcdabcd", dictionary));
+	}
+
+	// LETTERS \\
+
+	@Test
+	public void lettersValid() {
+		Boggle b = new Boggle(4, GRID_LETTERS, dictionary);
+		assertEquals(GRID_LETTERS, b.letters());
+		assertNotEquals("DSFREDFG", b.letters());
+		assertNotNull(b.letters());
+		assertNotEquals("", b.letters());
+	}
+
+	@Test
+	public void lettersGeneration() {
+		Boggle b = new Boggle(4, dictionary);
+		assertNotEquals(0, b.letters().length());
+		assertEquals(4 * 4, b.letters().length());
+	}
+
+	// CONTAINS \\
+
+	@Test
+	public void containsDoesNotUseLetterTwice() {
+		Boggle b = new Boggle(2, "ABAB", dictionary);
+		assertFalse(b.contains("ABBB"));
+		assertFalse(b.contains("ABABA"));
+	}
+
+	@Test
+	public void containsWithValidWordNotFound() {
+		Boggle b = new Boggle(4, GRID_LETTERS, dictionary);
+		assertFalse(b.contains("zkyz"));
+		assertFalse(b.contains(""));
+		assertFalse(b.contains(null));
+	}
+
+	// SOLVE \\
+
+	@Test
+	public void solveEmpty() {
+		Boggle b = new Boggle(4, "ZZZZZZZZZZZZZZZZ", dictionary);
+		Set<String> result = b.solve();
+		assertNotNull(result);
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	public void solve10x10() {
+		String grid10x10 = "eymmccsrltjttsdiraoarliuniepeousrcgoiseerreeistiedtomcteevcmkaualilaretneerectresieenspgizeoeceecuds";
+		Boggle b = new Boggle(10, grid10x10, dictionary);
+		Set<String> result = b.solve();
+		assertNotNull(result);
+		assertFalse(result.isEmpty());
+		assertEquals(result.size(), 2624);
+	}
+
+	@Test
+	public void solve20x20() {
+		String grid20x20 = "eymmccsrltjttsdiraoarliuniepeousrcgoiseerreeistiedtomcteevcmkaualilaretneerectresieenspgizeoeceecudsrrsrvfianrsicwtdieioeiufnidlaaeeoeieitmntleavieacalischvzeatuisiupatolauaernetasatttadvtthzraaneuzfpneenabiielhcnitesaouelsenxrtojlcastieklkrupeletaiztleapqgaeocbpteutnetrtozatluuarapepsvipesxolteatmylttumelctahsowlsadoelouamisparejpmuaasoaeszsuilubrdrannyosfewnolneudpatcrwatblttpensaaunvkslrekiittc";
+		Boggle b = new Boggle(20, grid20x20, dictionary);
+		Set<String> result = b.solve();
+		assertNotNull(result);
+		assertFalse(result.isEmpty());
+		assertEquals(result.size(), 8270);
+	}
+
+	@Test
+	public void solve50x50() {
+		String grid50x50 = "eymmccsrltjttsdiraoarliuniepeousrcgoiseerreeistiedtomcteevcmkaualilaretneerectresieenspgizeoeceecudsrrsrvfianrsicwtdieioeiufnidlaaeeoeieitmntleavieacalischvzeatuisiupatolauaernetasatttadvtthzraaneuzfpneenabiielhcnitesaouelsenxrtojlcastieklkrupeletaiztleapqgaeocbpteutnetrtozatluuarapepsvipesxolteatmylttumelctahsowlsadoelouamisparejpmuaasoaeszsuilubrdrannyosfewnolneudpatcrwatblttpensaaunvkslrekiittciivsomuestiurfuaxreeunuennetemubenanvsucimozentlvptnsoyaoatospesvaesasyysdlbdoraguhpleonvfrelentickiwzrnmimsaeimralovhetscejsdsnrtcsgporubtewesdklorlvteselauxieusieetfmiplllneuyprlpiiujiewverneussnnaxoaswclermderupyurmaareuescriqesbeeadldnlhtsnaucxeadstciqneeetcwtctcltavxgiiuorlomewbleeaoanrjeqeaqhzetmamisirasceranivleteeuaedeaatnsostwtbtonuasilsodhxsmnetecuoesepmotlndamvdcaeebiualneltdrtnwgerifterpepdetdbgollulneoynesonnrpesaustieundaevansmspaisinusitiaagrhoaeeewotnlagtlinjdssnocmeigvultkamnarvcloohslgiueawnyterddduepeislsmaemaiensuytiraesliehotcmaeoeovtsoiostialfertapbuptefeeleeonkeeectcdtneuidrlrpeenmeauvztltsetaeidlsrgscvlsenmetyeoueqesassooiajprrsytioqesugwvatixluutotimwlpesreeicylreeeseauueeeeapornntulivlonansipvoeeactiuecmeudnenrqaieordhluomrtsrmetetswlieqcmltslvsadeuspglmyruteoixiuoepdnectntentdaualdpcsoaeljvonkeftneiuedeeztsatencaectoeptluatriocdocrdtmudleueornptmeintlzejaaaneeradibraeaoaanpoisieeurtettrxvtneoegleltagkasosrastluadxsepnlsaadoaiepjswyedatmrsnivmriseaweinvatepciuuesssnllsssmixlesiedettssyoeuipwltetitececoieeozweaenmlaoroospptusidpkdvsrnqaajituspuuleiisheiogeinpbbsitbsvetofsncnaetaowooekmuntavroonjraduuacknoqqknnnrjoopeeofzdyseaoltsclvaaapiueceauofcdbntmxtneetpoitwiinfaeltgueeispzeacneqmviaiusaettplhiuaetqaewtfuuipoueuesnsoxaixaeeyavqllssqareessnmeolsetlvttbpbeoosesiuincpnersriiterrincnhsemaunvaseeueprldkiecnwtisultmmenensaojgidntetselyzagtctaisiraipzegeienjreosuuszuynlnpooesurddauuuitnouspiiuaeeqerelumdalnohdhueuuiiaiaaltlunnsnamleoprecysucviuirsatenctssjeniinreuenvirsntrwzntaeeieouapntlmayotrpsuunnuiptsxaevplkmuruasocuimontijceksmaeaaearurosaeitpimvtityevsualpsosallkkimiaaievplozjirncedcismssamnerotsprnltlhfiokolroleeaejexjslihseaoelqnsrwizluirhuraarefssdsealtkuediqtdpwekselinealineozeremtjandnrerracqoakiltrcsnwataavalommuslrdqawqpcneaiotajsaiedrkoxtasfyvermeyrnaibrdeiixlefsesvsqrlobkatcptiuxpmvanohcedlemkgevsuoexjjmenoteatptylewesoeotzbveiugseaswoeueoirpupdpulsidsiosueeealdepeltuwssipsecinicloeantylscemtsbairodutathtceeutmrsiarnptamasrrildiuwntaisaatculursrgeierrheeiteacuroruyfretvcxegadiiunguenunubreuflnccretdeetwmdunttrosyntooieeeutvenra";
+		Boggle b = new Boggle(50, grid50x50, dictionary);
+		Set<String> result = b.solve();
+		assertNotNull(result);
+		assertFalse(result.isEmpty());
+		assertEquals(result.size(), 27139);
+	}
+
+	@Test
+	public void solve100x100() {
+		String grid100x100 = "eymmccsrltjttsdiraoarliuniepeousrcgoiseerreeistiedtomcteevcmkaualilaretneerectresieenspgizeoeceecudsrrsrvfianrsicwtdieioeiufnidlaaeeoeieitmntleavieacalischvzeatuisiupatolauaernetasatttadvtthzraaneuzfpneenabiielhcnitesaouelsenxrtojlcastieklkrupeletaiztleapqgaeocbpteutnetrtozatluuarapepsvipesxolteatmylttumelctahsowlsadoelouamisparejpmuaasoaeszsuilubrdrannyosfewnolneudpatcrwatblttpensaaunvkslrekiittciivsomuestiurfuaxreeunuennetemubenanvsucimozentlvptnsoyaoatospesvaesasyysdlbdoraguhpleonvfrelentickiwzrnmimsaeimralovhetscejsdsnrtcsgporubtewesdklorlvteselauxieusieetfmiplllneuyprlpiiujiewverneussnnaxoaswclermderupyurmaareuescriqesbeeadldnlhtsnaucxeadstciqneeetcwtctcltavxgiiuorlomewbleeaoanrjeqeaqhzetmamisirasceranivleteeuaedeaatnsostwtbtonuasilsodhxsmnetecuoesepmotlndamvdcaeebiualneltdrtnwgerifterpepdetdbgollulneoynesonnrpesaustieundaevansmspaisinusitiaagrhoaeeewotnlagtlinjdssnocmeigvultkamnarvcloohslgiueawnyterddduepeislsmaemaiensuytiraesliehotcmaeoeovtsoiostialfertapbuptefeeleeonkeeectcdtneuidrlrpeenmeauvztltsetaeidlsrgscvlsenmetyeoueqesassooiajprrsytioqesugwvatixluutotimwlpesreeicylreeeseauueeeeapornntulivlonansipvoeeactiuecmeudnenrqaieordhluomrtsrmetetswlieqcmltslvsadeuspglmyruteoixiuoepdnectntentdaualdpcsoaeljvonkeftneiuedeeztsatencaectoeptluatriocdocrdtmudleueornptmeintlzejaaaneeradibraeaoaanpoisieeurtettrxvtneoegleltagkasosrastluadxsepnlsaadoaiepjswyedatmrsnivmriseaweinvatepciuuesssnllsssmixlesiedettssyoeuipwltetitececoieeozweaenmlaoroospptusidpkdvsrnqaajituspuuleiisheiogeinpbbsitbsvetofsncnaetaowooekmuntavroonjraduuacknoqqknnnrjoopeeofzdyseaoltsclvaaapiueceauofcdbntmxtneetpoitwiinfaeltgueeispzeacneqmviaiusaettplhiuaetqaewtfuuipoueuesnsoxaixaeeyavqllssqareessnmeolsetlvttbpbeoosesiuincpnersriiterrincnhsemaunvaseeueprldkiecnwtisultmmenensaojgidntetselyzagtctaisiraipzegeienjreosuuszuynlnpooesurddauuuitnouspiiuaeeqerelumdalnohdhueuuiiaiaaltlunnsnamleoprecysucviuirsatenctssjeniinreuenvirsntrwzntaeeieouapntlmayotrpsuunnuiptsxaevplkmuruasocuimontijceksmaeaaearurosaeitpimvtityevsualpsosallkkimiaaievplozjirncedcismssamnerotsprnltlhfiokolroleeaejexjslihseaoelqnsrwizluirhuraarefssdsealtkuediqtdpwekselinealineozeremtjandnrerracqoakiltrcsnwataavalommuslrdqawqpcneaiotajsaiedrkoxtasfyvermeyrnaibrdeiixlefsesvsqrlobkatcptiuxpmvanohcedlemkgevsuoexjjmenoteatptylewesoeotzbveiugseaswoeueoirpupdpulsidsiosueeealdepeltuwssipsecinicloeantylscemtsbairodutathtceeutmrsiarnptamasrrildiuwntaisaatculursrgeierrheeiteacuroruyfretvcxegadiiunguenunubreuflnccretdeetwmdunttrosyntooieeeutvenrauadifguljtnluldveesenumlmsryenwereemrsiaasnimelvdeivtyqitcpscettscteeonnnriasetvrznudetlatjrreeddrenrgceapprwnhjcezfgapakmaiueegtonsktzniessaneenarwuxodatetmerapsaesoacehsdnehcttbsekicsolvilkiniaauydanerspnjclkeecbhaivxerivnscaktvmpnivmtyknxlxigqiaiarssuatdenqfeanespnicwuprveeeaunisdhuudfieiopressnseeomllreaoineigeaaesetninawreinonmevgeveissetuvislntutispdvnnsilssvriauisneatqnijrothmpeeynauslesiplnynkewtprereatnardruigzunqvleyicrirswpknireppsdcextkendnaesoatofsnettwiasvseseseinwskiynrltttnamselchutttylrurnujnoedaplolsmezumeanmlciterthuueounwqcdtorrsuttodseenepoveaiseulevietsizouensvxootseientiroumuceqaameaodjsyeelceiatainsedoasaspeunidrolaegnnsntuezittrdevzategpsceuecjeodrdastteesraaputnaiulliupnneslsipxneeaasgmciijmerkrqpinaueietroezthmieebrarismaeespuaihqrdxovaeasereegritiiaanecpnteeinpvthliedtndctnpcairtztalsfaetpnnirsdjinbonsincsmuepeuielvdiiuozrpecoiveinviklsloioeeieasusaurayyjonoskojuluseaprtiraucwnvxuutenseaunlaeuetiaottnesintcculndqeiiwiearceeiozeisdrtudndoceatinmcaentarnsildnsuoostatldarooximlfahnllqaronanuitsebxluvjlurgulisluiesxltbjosuuatcqaeeaiddsivokewnwiduuluirlsevndsyeniedeokneslpeiitscnagrourittbnniqtaruceeqmnialllnastnnobtoiaetluntwesaetprattnpnctttclpureedoetriecuscofwznixasntseeeeeseoriindcviauociibefxutaneuutsuarllmeemunnsnrlitfridmrdullpeoigzcdtifreeaeerpacatarwreabstatleieptaeotpaereutlbieueescetueiaaorpiufgouifejteheuuotmcarfnvsdivcdtenalssahseuarjatnmhaiecemodelrwotesneeiascakvntpoerereirtaoatezeeonlapsrisfueeypxnztanxxeexseiyeiesoltersreanucanuesqezsstusuevdyirssnerduserneewesvnadetaoznskunerreaetneupeempsditezcseoenvnvvufnczeprmeomrlessuesioenpedeeethaarwvrvauinmiymmocuyrosaialamthiaeiofuwasntaumedalurksasialdukelpdsiselniaanarseeeteiedelutonnelaeroniasoezuinmsumssnrlsnaaliaipczeeoamuazitiiorisieniedlxdvnqioiysrmaeiedzneuucmioylucprnlntaillityeetueeramavtemaseleuanaeeseduloegejrxdaennidnaretznpmrsisoaraerienninctsuttrcurnsiewpafscirvnlteamaivtsaanneewoaptnnaobnugssetouctcjmsnauidaaeemptsmoesnraaigeppuxilodllnytmektneoenidtickpnielnaafaeonuurlsiucreleaiaeuxteiicpfrjteeaudmapsesupnraioiatloianaiincenijeednyeomamsssriaeilsjaxiusueseiiastrnnicgrucpoeblenjloevdsiekrgdadeumdaetijaxocinnaroxaueediknadmpnsnmeatnlofeijtieszptsezrhyotrudcnaouaemaeeaecaeyoqaouesxfibaieocmtireuineitluiazrsyeonanlvvitaasukatotbadrelaczoehoayesotlhhlxetaipirtnedrlmskeapsefmmesbieoadeicanisluupesaursrtysraunotoaimuaxlormixeefdloradeiqttsnvqeisseueinrdlesernisbplidynavgesrvnaancrsdrsaronfeceaamlriroaldrseteucauloieoapmhdudsadpnmoeeiipenfueeasrattswnakatoviveianltsnaepsirpnrldurrqvesewdtamsenmsnzssccyuscaaeuesraolutmaqceiittnmseaactainttletudaeeudreeoiicaaaottpneimdsaaxoseuereiiosiutocsninsnduutrezrnmleslemlursiconjtneaicnenledzeqyurmunintoileaouuaorlmligsnruthienhreuxhepnnektelqeiesojespveopntiaeasolsptntetldezietnetaqdderidtoxppeenritparizcipourergeriskiunafdiwuloniosrlciritarrnnnriptmnemoatoupopnuemrroorualtiluadeeimlvttueinntanqerpnneyveroieenfuunaliculdaretemtredasolgstsjpeptnibjuessxutstiedriiarlinaeshanrevegzusiadphetefgktetilxiateduysenrrcbpspeecncralaporsonsuissozclsenardayeemqcqvoxaenuioasuryeipnxetuimaersoeamertusaiboycoeaoosiyuminatovleudsetsmlreufjemdpmnixrtcaerveeemaeitissottacemaeonptesncudvpeptippmrrsryeaztpstlwulnkueseiulnueeihaiwqarlaijidisucninmaeubinpbumseunnmbuzlnunoslsruoauebooriblkiropisnsesvtoaalrevesviiaknonenrambettslpeusmsceejeaeiieisocapuautavdxangunysituieaeeskgtiavplaplidxaoelvmfarruubteagdttsvjranasxdbnsriouresadlnqpuwosrneesueditutgosiamaeesdtzsxsiuetneseeeeavtietadnnonenmaudlteescvsspiiaieuosnmmjsederprtnljupaajnlmoulegtststieourijnepuxzcxalxsljldnjznjieeuylniilsqgslpxesaeropeogavesqodeuiuttiaeionttoedytnnncmihfremramhncruesvitteleavlrkulsaloudnenfiemwrbpeinersnaesaugiienfosjuevessscsvacededscccezltsvrtmplreeeleeoslnixnmsnaauoaeeeeuieuoelbxlstridlssanpmspsnhauuuaisbmavrlbytiebeedeullsbejaiizteontplvrailioiiiiamerasorrdielpeviatfemeetpamiebsuaqllepeibndcvaeiotzthrmurusrmseiuegijsslveaeaniokamsusripreieofeelreiemeeeeqriuuoolcrjmtuimwnltkiraaeerupnerueoiineilwsilieusiooiisstatqansweiwaextistroeemeanodprestmeeaiesoueechedsksltaolfonianaesaahaasoranudilcxutateicxatebesvtocasaedaueneetiqitunasentweefaeasntnueaesmeztusbemllraeeeennalipefriemmvkzouidpsuxpentaiueaisarronlelesneapeivctassyisiauaeuchhemesefctppteeaisacneureboscityijsinthbtaitaaeuitseqiccoptqsfnuemeqaepnfbdcqdhecaltrcqpvpabuoaaamueumusexeoleusednlnvdndrtiaproeuerdenreqluuarsnyveuwtoeacelraiiukmeaqicdobpmsesouiaaeloeaixrcuseesaecnhvcsptmrsekeasnrqralintoljihpqasfulwiotucmonalvleotmpurdartloaeaatolseregmcoinixzlaueureseplttxsehrciemidalrqiatpiskrelrttaaiotrnisanvlnlnoeesatealvmitcueznidnekdmavvsmkcenlnostfrfimdaeaeonsatnraocuukelgaatorpoasnrenxsmrujeeseteattzsdlriaswlrsuxueuuyamisenqnwlihtjiuxseurtbtpdimyaraasnepkiaxlsosdulcovenitecntjmyetosnaattmsalstnucoentsstrdaknnsanoketglsysirrhnsudueaainmsmlljtrbbreimatsxixvsefoaaaauaereamaixropineddrhzdjonhteccasesoesfnouzsonfiimnnieonosadijeerstaeeveiyrrtenaueroeaevwoknlstliuenenteqekeusnlxlrupcakcuelsisluiairennbnwlreoweciokuutcretpeelibplltathdugyesrmlnlapuguadziaeeiczuimeuueottileoretaiuluditnmaeuntidpschoenorctpsccnafeldtirssaunenneiaoinumeiamseaicolifpnuiteiusevzvuiefnatrnulheesmleeooiaeepscgeetcbptahftueasimrsrmwaziifrksbsernqaslqrmatondeelnaabtuollyasgkeoesrsdetocaureesovwiqcictoeivasnedcrecaenrcnsaipnamtnlvaocrlnsrscsszfzurihepaltvudpoeismeeetistriaaaayotereknmotuseliqesprloesientodtailrsnraehushncwrsursptcxeilrrhicreldiikprflslomqgtotnepatuhunsgrneiuerrruieaeuntneatsneedleatlrrigdtnlcuelmoeavuolrrliameslmieremjowiwmpaeyojusrdesevepoaenaeinmsezisfnhreiakdlictoihonsnugbipipcexnlrregfpbfczslreeuemandujdercasetelgenferumreqealsiepisgscouilirepsslevlzrnsazeezervsthuopmufsrefoipwfutnctennhsmesqutslsrdshtbnrittoeenroiuicrjaearerousolluyaalaoeapsiectaerebtlusmptabcnmxnionzeasfknnskocinasgltsnsrscdsoteoeeeeosoalqesrrgsnigletdilsdcmtrmtqansreeeoluazeitdlcjiairwausteqnouivrdruroanenrseulhvsnndioreexeuaearswoserumlhtqltasdtrrlareiosrpesadsaobdiwlsoemeeaiietnkutbgduiwsnxnsehpqsnmguanoatwldltiqjricutuoapmiiaslcoouasskaioesaenneeezacnanuadgntrppxislrulekzoutiadolhernietuateuratclonnsnarterelieydnueusrnrzuoeursnelsllaoummoinniradouittmsuedirstizpmpwjteiyhivoorergienneaujetaidvomtresliiatlaaenmirbiilwsasotyeaneuislrtrnccnrtnnedluwcueaascdtlaeiviauqtnbntuettsbttaetmyslcvijuueveeqltjuakfniteospttsrsuptsnrietferrdotcseegakslmnuasnrasqwtsvgtsrlszasleisaiaeifivdleuunsalssixutintleaxiseeatirtobeovitavteeadehaqzlteaeraivesauienrtviigatqlnylattneyaawweuiitdeascraiaeracencevdsegcasbadadlrsegpnalorsofdomnuafnnnneeeatospdlmsidrlorpgneslevxiacriiksmyaeeemaileindesdniaenumspgetutemsqnlnestecpeechaiuuilstwliivatnlmithroteunoanaisoijnntradseadeeyuoaebejonearecaytrkufeelerwerisaonlomijdseensetuzuaasaaeetdaesaeuseuinuuoanutepuroteersnmiovzaeesbbtutltsuttueerqefanlueksiluasfsidreevtaenlsesmamiyenwvxweeltrreetauoeakbztvnuioovlsqtreotqaaecsisisvuidnlaevilumvlrtzjeduuurerupasnffupebelfouatuyjmvunirpasmscsulrgcvunomenkmtaaeeiurrnernbpetuuuataiatcuvanacsiieagkvsllrderdlaairlutweniplnsremveeoaiasoraeimuaterardeiaipaeeoartetsileiseiucsaasveamsgeeaieemadlotraknnurqecauaahtctrsqonnaioiqbiadtuueecuzertfapspgmpsttenitsaiismsolrnirrxnnnteunselsdnyeiiltrapglmanoptespeuisreaicsadnvsirqsncteeupcreiimmeqrnafearbeeciorieehleseaosmacatsmtlsgnyueslhngeusuomvrlanscoyoxrtsipenanasrsaelxanscoyausonkanlifpjotsiasitciartfraedwausmsernecesoilsippcriijannnstjusmpiarcotiursjmpeeaappsijhvsssiteoeabtirituoxahhiitzpgrcurrrsipstitmpsiaersqljaraeetaebarebclueaonieaahdiiieroepueteeovepoiuediejirrndieeaeuoremsmrjmtmavkrnrtniostqvmlhqoteeurvnsgajplannrlipdspmtaaiobspcsulvutenteiueetonanlultahnsessaa";
+		Boggle b = new Boggle(100, grid100x100, dictionary);
+		Set<String> result = b.solve();
+		assertNotNull(result);
+		assertFalse(result.isEmpty());
+		assertEquals(result.size(), 64786);
+	}
+
+	@Test
+	public void solve150x150() {
+		String grid150x150 = "ctiiieremomeunuarcnusuespnnuestisbedbfeejleaehvnwadsrunrrtdiptqsternrktoiotnenrtwynhetolnmswrieaeuessoackeuanflauvvxtsasiselieupnprtuaeuvinslteduultattsztuotzdwurztydtqwiatsruvodzeoejtfeilaternzeiimiisooimaijgelrtdsqiicieuhsseulrssiavpeaecnrkynadelflwmexrtildvustbonmeupausbtlmzpoeaaeheoryntfeyhiuetcnwltnsiraneselgaqroesssonlvssutntaliaistssijqmzezmsiaezasdnsumazncfpszniapedorqoiedoeegmedkcreenaitpxeoraotmrvebtgieuovnitpaasnioaiualisbssamaxusirluonoroahmneeoolxlumcealilarleiaatoarplnrfteiaciengerltbprmaoitaqeaintuudbetnfmdhdlalteeossdodiivzomakninquaodaneudcovtqeiavtvsaiidintuceoesfntdlesedrsseeoeeenrsaesjimsetbiocrsegntnteaieloesetritrndtdesgiusuialavlqitritleuoiatrelxeaeulifrerlstietnisaaerqselrsiseoeeaoueanairseosmaetmitnpotupieusrtaeleewaeouxntatisitessepmdeivurbeetaammjinunjinoaouekjonzlucgnlaieajeoeolseluairodaoaeaoiotesoteulauezsatsykisaiiatzretnstttbspnneoccsoujchdoeeeepsrostxqoeaetstdfanintretaetnranstrnnnaewipacaetcejrhmxsovtiaisutedlnetnraeqilduelwnueziktpheaeircnprneiecfvsttlalpoctavmalpzeseaefrwbearootaaeeeientlouiktaseissaiepiineuxtpeesvadhnqreeurexiuugktrssihdekinaraifeuittnzktiicjtuvnlisraexregotazuisalsuaruuevraautaxrseotssaehpluiiabeauxayutsottxmitpmtisiulniswapunavitdoepraschsiriuemuresoiellxuuzomregdnnatpopleerinidtucmsrtairtpstenisulctnrexhusuqinlztzugisdepeidftaieqaiuqsndsputrursaailnitbomissdeeateyexewrentlnskivsntlionandlgartdadtabccitoatjhadnudgegumdaepuxcsavieptmiuctaaieglfrwpiairqptintieojfiridiaruncodsodeiutioalldsiueipeiivntpwaycoopuacrrultlcsdwfedetdrohsutdoeiesripneeruayonraifsdasiaoulpdsuekatoleowsassemnanstenamiiedvtscimmouoessivaprniarsrmilasawmaeesanuamanncsinvetnijcrinrifgauteptdeivlwiytelcenetcenerlstesteiuaxeeoortfekeoalcbnselrsssiamiuaeeesrauaueakssetstkbtalotesoaitqstnnkrnlcbrteeviecaaamenaerhreeoqmemarmntrstaieuekhalttuhrnepoktjieancsjaeiibptiessvureeeiicrkcrpavhpqzaibttsetnsnpeereseseluqtaopofonsihzstpntunlarrnllomorrrisvilesdiisnuspolnieoisstirvrtrcusaxuscaeqniohwiisdoriuavikfsulghialagronevnfdconpljzyoaedalgrluitemeoimueeetyoiailrfdesedcaiueuumesaoaelaegnoesezoarpeocknosvtlronsbinxkrsaetiafaanpiiertaeoupnltisesecerrveroldntreudcsiaellepatebiconrlrwnegzbgeyacceezaicdeeeussircogrzruibruaayosdneeunrenaeicddeenriifmarumoarjecrnlaivwrraltamnvnexlaatvkenaoilurunurnyleeteeeeeeseaeanntsweeemmliyexetaztiyrtknesidnefbulkoeirotanaltlwryiveeaotasvensiancteaamnmiariiaonioeozsgbalnaorsestxiinireeitssdmtsapsuatardryoltebuignveauiniusceuisseeefacsteseesitaithrszipugseteeoeverlirtraaumaesaacorauimsracmtdusnstsurtltacsaltlaqlwewlsonsiuptpceousaueeejunlsacsydtasesatptaequannaplatneeildbtotssioodvlcmneeianrsesadrrmphireeaszesneljceiaapectrreseaebatrniiamosveelniuaciljihcdnnlrrzddbvlartrwlopsnteduauiiitetonmnaioprmeneaeadtaeeeeeseeearieiscpvisesalsoextpeueeemmttzadecprexrnisioudodusssetqeevrisumuktelstsiractwunlrpeziurjvaareeonestelctcertsrarbrelesnibrcreelepvaenaezelcinnveulgewxnnuvrtrvehmirntlrtsxeerolvnkyduajekiieobmiiungenvsyqvutxkrmdepposonjncrsuecnaboadeisopidgaesrokruvsiooaiiaauikomasbnaherbaniloivelviqaudapaqmdxalteljimmlssirnabnerareaitaptlturklvlatnreiuaseaercdqmslahddabisnusiaaedratirrvtessriaaefetearesonnrceeruxlprutwfiejtoarsualmdnvonuseceutplsaeryrandeitlaasaihaovetnttuionaveeepfezpzllebdtnedouilnnemotrreeeialrczbelrcdigounnnjieoeotseelsutopaaemciejiujaioueahteidvolxocanlstssncinqteewrfenucjrpuraoasjdrtatwuemsmnrsuitysslasusjnisnqasooavtiaduezgscweauomitplaoaitpiociecdgnsasxsararneutcpeendnlereferndlaariooeiiieodbiqntinoatinvresiiilnecqnlaejaeeucqlctrjunfmnaaatasafbhrukisaeiaoelgpoeucluwwemegtrlxssiuxnsdisapueutreryylsrpapctmqkarmubpirjcwsrpimibnsiiomqaaisvsullipoieuecouevkncicbasptimanasniotrrroynutujiearrseluerlkeeeeolcveetceszaoeseenmeilrmosedjnpmuctatusleeniaroeoktwucnsedhlreasudorcasagtjrsrgisuakwocrpcnieoneecodiaetsicreivlapstepeaalsrvaesolsdnoialkapgcunbinisifeixmccvciunjoukrenvsnletcucalaylsscnaopqexsicremretkpelaaealaosluugeaodxeceeadcnsntnenianimaoneaovinstadhilrillieeeuomsvnxiseerujaabaihstseeqjnetewusaieuboiqgewrsaemtreeppereudelptaybdesenousdoueicvsntkiutgjnusescjmnonnisiispnelsiewyttloutaesixtrmmsxtukdttehticinyoaomlidcepitlsmstsreuaevniitwlrlsarlvecataszclkrrnsetnteentjmiomascomelpprejvitniuecuesstpieheiarrzarpenwrlorellinailiyttdeniihtpreaeaiastpytrudnpteydneoceuejgdikaeiotljsuisnvnleaseaedtiltsidcentsdrillscteeaeseiatkspsximlroeoaopeisazolveraenkarceilersynfsmeltiivpfacnimsqeeflnstabstssvmfutansejinzypiepzpnauirpdprlutienznsetepeaetctrsnndddvsetgcpnaiacirssosotltaonebioipesmsrueeoenloniayleunrsllonenmposeuenrsmlldndlnsawrdcqcepaasiyroilsurdtrleerueterzdnlmlootjatenansertkaswoiimmenupoaojgtrdtceicrarrsneivteernwpoasbrsntanoelusasdtssnuelieajuugirveosloinstmnuseaetlccafimaymbsstqaiuapnnlrmtsadpetircccuaemaadnilunenauetlmqzllnoeeeasuossxdmieeeetlpltmojnniimlipiaqsnstpeqnxcvpnjuudaudzaenrmuoanmtoshntmaeeisanbuamsalmnuptmilodsemlfoeiacrpiieaenztctteanmeipvztsoavcxamlrxlzlnegkiolleeeistemdeestngurpirsenskdekxarddlpuiiusegtrrpepsfsutanararmresosunerrmeaibsaeaariteoestkpaeeppfsdgfnmrueepeactmovaoslpxllcawvanafqveueueaukeupvvieooesuhaeeaopydrlzrlktneeeelaeaultsnsarekcsmonasvloonnuncldtnvatiiqasrfdmanuatierqatteeufthvuextnkmtrraomrmpudleieleoosvoemnueshleeelainruneaojsntmrcehrrvctpelicelscaucdidaimeseosappeuecesiaimuvtuaootdoucahcrfarmttnoeaycsisglmtepunusueveatnelnaepmtchcsnlrewlueneaoljketlanaaitnclirnpimspprinaulecclrcckesloyleksaoteiosataeusetpttrodrtetwlqreuitidugnnlaazeuuistcicsjarfegoietatneeieionemoiaoaankesnirpdearliansuevinbteieeeuntlercstomlexrujeisduetaaueielshsemtrtiiedmslwtstsqcpscuemetnnsdeotrebalrvmipuolehncnfizonrwbasclrsdenaeedmfloiavsegnraeuuistemdiofsisowtrnutnieinavvmipuemeircjizevddfuitaqnrptnstauaebujchdalhnxeihmernaelcreostmpzrenhdoeejaisepunekpdeqaexnvtaumpsscmaueltpsoqduaasalrenrzdnzzfrsnlebariiuwlnsaurmqeenjiiawuevudoveeooeieidskioewtcwvepeesieilriaussdaemssvnsciisjitpofstlweeaimieuttlcnazebvroceenriwearrrlepisirnedegankbeecsrveccyiropregtnfesurvsstrodthepitetrrugangnhqvneetiintaameuilrodseenotzeereilhmaeenyfaaulraeeaqtpnyeerseateemukaaeunimxsalpqokfccrrortspanukdpnstsuneetnnleerpaptuawxaraeeesaiizlesaeuieesrygpenimineateonvhepsprerzrecloasstuxiuisfassyiaituwteocenztiseirnsatbtntserseelcainerurazubpnaveeqausbzateniirnjnueleesixmihehiriiarhtesiejasdehaqrdlraaimerisrwtemucdeniaelenateehkbruzteonsdytsnepkeumiudreonkrdaruserlsisszevapieemmysneacateeotrcslcxreeanojmscsrnriiovirpstmntestrtiamsslomtrtonmitanlsceflzbieeiroeeiirgnafuedteliuepoelxieirietuusikezeuddtslexesivrptctemuncsunojeojseienensenearaparotvaoillonieodiitreolpdisllnnseaastnmrinaedsdannsqluvrpnanrtulmtdleygeuewntwrstsurnluvueoawjemaxreiepvifcwaumouuttojalpfauhloxtveensnlreqperilnlosorenlvlhssescgehnrtoeunlyruiuainaaoslpuoevhpecnlqcvnensrfatuslnnaizxtstneadaeoaescxtnounntortcuemuoslrvdatesntrpiyctvtjaoislnuaeriracausaatnlnslsrojlteatnellrrmoerdaecauemrcualdlserunekrsrtstzisrrtdeodenznxrlqxbisruceeepdpriaconnsnedyporipluvanrmlpraoelxluieaattjszdeevkaeekrirrexsnirreurcieuuhrzooeacsprnettssnnnotaopienahnnmnriinthemsrdtjnfbinkrtdjauopemhvzpquesrerrusaessseviliusssfttslimafestrrpdsuenjriaeltiuidsooayttsgiereeeaaendieutnpoaemonvrpdtndqnitetuseawaluaavvheupuuwvsqxkujsymiosorreditomebntidvunpturuvemjpsnooxtonpetsaqunpaipletaeemrmaimendcthntqobenwsajenknsuqsusakniertuvuuraefseeoslvldadsanretineitortelanaismaqmojelmsiieamriconpaulerpbelrsslsecsseloisoeohdxbnerintrtoseujcliabrtenautheesekngniscdnroaauniximdngjdtedapzanmanteqnebebcfenlrezatbacpreaigsnnvskiseienautfnutloauemsafsmafueangeonokcyeudmaqenwmtodgaylarecepisauualmarslodrtvategamaaiiesnucanielonogleeousmbketpanratlkaedutaotpyusxsetibaxflmyalosrosunpltayereasuniurlyetseaaeuaetlqmueueebrptghjojreodeaueraaixnretrdaelasdaesjnropdrenovsaunnaiiyqefarvaetlaxosrnilepaelexssqltrfdjgtswliskerssiepcsupeeoncaailrtepteeauaraaoemvmynddnepasnlierxfioeeosiksereleaejvohnutdsoueretinuirucraaoindeimeeemeottlquoiesueilneuiatlyttaeobicdmorranieeemltpsldoieieptiiialrdeudaiaumydveeneapraetndlssxuneirnvlnoitepaeeassvddsfunuomsseeleimonvrsezhihsacveeprrceottuyetdiuiawngegccusiiaroonlaesbiequhumiibrrudndkjudrumiecmdebtesnieucndieealqizhvnmdeclercoaoxtqnixiuiodepjsoiehaliowrpveuafnunaautueslapebslpsnoopcgvdeiriraeaepaeneaxertcisdneocikovucytsijnterbnupherreifeeeaxndosaimemoumonudsgppalaramptattlsocmoterdxumdeavvnucitopvpsxennafentehaenanuducarspdllotedesesplmseotenetuvasiaascieanethksbesbuesuhaeuskzeiiotisisssleiadosrsaicavbonaiunrretitsseenreibieenioetsziedamrshmrmxraessaneabuodiadeeieioesurvlatlogvlwuieesntmcuruejpnnenadasndloeovaaneiamnqjhzaisdtzwdmijqyvfokfeilalfeeepuuskdtalafsrqeecreenlussciilumhleusseiceerwtnperdawnppanweinlirswrlvbnusslkdiequncrlbntovoiaonetsnansareterpdrelsbteslgieiaatlrnsitmrnlfsdoifnqasdnrajiesciwlpeisacaeoisnnaoomkceomphnrseupaaizoaucxfannsltreosnbulacrwhotauurtdjqnjuoeeatqafodracpasivaoirxiedrgrlylrwimxdsdsietermeemoiibsunalrdaswouideaateejnruneustsatnuesmprwnisncotjaitenoseseamneaeicconqcoutlerrwscmnsdinoiopuzennlmigxsupiaionoltesetstsueteetirnoteueldbeuoltafeldesclaibietewesaimmqseinesouphuaoaeiikosegcslllbcrinsweaoouamerdnsetijssaieeeticnluqtttctuuutitatomluleydazieeemnsopnlnrenxpitexwdoittanzeiolndtrrszteduanlseikhroaeqeereivcrlfsczeyomnumlcuipcunncawriuliceeaoespuuenenreopusullewdernyouluidlttemvoaecseuoheeetdivaetdraekoousuuaurjnetrostttnieeueeaujmeaueahcueimrenlsaaatidlelstnpdmeursosuiazaoenaaeebqexpwvlepnummtlnmareetieevccuulresaarnervrmeeosrrocuegmnpieyasmeulasnskneearueauttzojealuevumstagnhmlptserintyautksilaleseullnliomayeebprzoeaeoiivutsniiiaravtceelqbisauusunqkvizrleanctragssrssewekeusxmiellsknatarenvteeenntpoalrueparnlisueeaafmjentvdxmleerviaeitylcqnlslcspwetsejcezatlcrvaxmnileeennvpniageqeeittmocudnmoeeimeenasbctaoeatieialnadleuamsqloulneererrdetutkwrstricioeeroaantuloaenteprtxraamostinuvnaparaleareeauitezacpiqxsnhiiusldaptlyatbeonvtamsreareaealadyprenzazaratrlilsotieeomneournpaiueenuunmaaoiiiaaeixaayemecdycsnegiyeeushstuljsatyteeulirutpnieuncteeenmeeronxaokaprbsviytseomveantbubumeiheateureipnsoroalqlvwaidesilebeltwnnqbgfcisrevlldeetrnearaameafmatleedxlrlplmseiitoeufoaamcthndinmiceterenmatesanixspmtleraiiozaesqvspnwueueamilnshjimedsnumttmiuvimuuroeoaeatetobeeaaxleoedepwrnatrsteesnucnvginsisfiaocysvtmnnanrrleesnseaduintamsuprsmnfuetearouipltitiacdseuxisfltstssldusrxulmrcetatikwzsnsxemaiaesxalnusaelduconilrnklattetezrntiesoeorneepiemijnrmnaunetnsniscddigrvefeaqpeavvhosztzhivzeseaeppevuqioenisicnatiuulqcglblsatqecaipszcirturethnrieaptcetseinefrsjgmcrneisuzarecsiaetdpiogjeyetdmivuestinieaxipdgvadieziadodsuunladtsananetnbmvinlststkrhaiuixsqksuiosnfueelknpziutamerutaslscaeuccgpeesnsunuataaiiziaseuiraaaesieesaehtsxdjtslwemauoesieolcedinsatntyioolapinradenmzeeoetvljslzbqrsapeefnaseeueatilveswmeiidvacoierounessuserdteeicnpnizatriagdeeitcnxtiioemziiedotctxrwndcrtctiiltmihniuttlneureeeeseurataloiatnnecshptaeeziacetastafteiecilinuoaijeluteoeaisrvldaokftoonnurtlvrkusosuosiaietsoepuirlkcutlariolaualetnzdyswltrlesmfwemindepjyxtdthguaiaiveueemdinjoaiuinlhalncisspateeiraleermreshtgiuaineeuteuoxakauelldarccuauxnotirsksonkhnlsuctnunlxiungepeeesdnrlraadmseesetucgulxaetiekriraliefpceveqrlmeaitivfaaerlstvvracssneroeaatsytwlwpubnhnauseedoaeceopnmeetnussrtaitvnltliebaeeuealeetlraaetauoardinogditvrrjaeryitslerihaseantlstteenesvcwesuceubhticcsspiusiyrezuciwlrualsitaendmltmieaeeqoldtesoisnvanucnieluvoritppliunveutirorueriruawratdeaevejilinvnplnimsrisoualuqqntuufbeamleoibemeplqeepiupeiozultobivrtatoadoldipmoqweisfaetiiiannmjcdugrueqteglernvwimdxsamiunfdeeeiifaurelaltehlareweersagkisnetimpaeamiiwmzeeatjvututapqutniocaetidjrdzoetniraptkletilclpnidrinlaortwwhhgeqnerqwiasruesiieooetdsysebseetdspsmusweaxoltcimpavrssuasuidrthiiatenrteuvbsutihleeesdnhentmmaoelieemelrjmratnssrqckcntetwoqstlyssanuaeqrupnaiauiuarrtlarnrpsetmsilwlcituemireseeexanslrofsengnrtneonndianhiaeoasmixtonnaooznrmdaazautpasdtdanluejiwdcjtnaumalreidetaliernrenaadweancvoukecarsoleregomeontbqdminidtulsctitioatssnflkeeadolniankuerttssavvrrtzeuitaulglihndiileueikfadxertztarrseoeuonuxlvkaqdairkoilreelfvrxumosmjmesaiocanesteiseavtwoarrayrahlktlenepemsmrrglieaceysrwiouchupawnqiwmlryeachibfeaaeaicyqvkaauacfqsiueivtehrdrcovdlxnzltxrotrcedctuatvkuupadsephokllgmtnhnbaptuqpomencnsueeinaadlinaerisaulagaaeneitloiaxocdiiysuecbylucuismqtueanjiseeipdsdnanereiieeputneetesaueaelsapiuiircuytfrocrrueacdljclmarrcnaxsskbrdiwasgvtqekmaiildonneluuoatsmoercnanrteesnohlaiccmhsragentulwcscctdtdeesealdrloudxtvehddtnisieecugaosuwvseenslmsnysjrteznulgegrttesecjipceveuelleasdjeuceeneetemqtmaapoasisuaqeirteiwmrjavrnnvcrrunpirntsadptievuwabuotliaisinmdedasiuuxeidsityftsrndtountetiltcnneebemeanimtaedeppselmrrdtnjateepnmassnuetaaovtaatortarrostuohtodgueicpednebnouerriiebaiasnlsrabatilihnsienrniuuenreeoucbinseaiouinslrveasuroaejwmncasprslapilmaufonpelyrpnlsseutirpirutaaeasytrettxpsvadayxiegsuiseeomxzguaiussponefvosissstznroimneettrntsokurtlmoslnsoleudimcenandrcnapsuiiiozmtlsoprminpeqrvaemaetoilyoluuinmxavoauscllpestoypoeutoeactinnssateuwicnndrfiupbdtvueenevteuctislrertuiveaoaitnsteueteieleoucpuiaivearuttsqmaecmepoitwuiamuusiaasammtleestotewemnalroitywnxaitneutterttaeottcdoseveidjigletisysaimcttulupppiaryanpjsgnpbsutpiebdusxsmaipteeuooletvuktnpnpsbuleunueaseefsscdltcaqnoyayunuuuygtoicrdcwntagvaalttopoeerlcusndaovnmzdumeeeevellnlsiuuotesvreheedstgamupiaaeureruasfsenjeruilioitrlttnejnaqlvoesisnmqmpomnaviongeaazaasruzriisrvatppradetafoeellroeiaxplqsytneeosailooroebxceetapkufevdtedrttrteeeytsrssetkeiejtenifeaiealytsistjesbiesaotcanseansyonnceeeuaslcieduolnuebrebpdyvtmauloppreaoletildvbwegreruiirtsspnvookaeeilcerssulmeilaptunaiepyctpelstapnilaseustilurecnlipzvnafespycblenoedlspeidaetepaneridcnescheurmtkocnritauirtvuaaevduseidnrorsifnearntmrrtrtnqaaeubirnliwbslpheynttwjqpzeisuarenoiilplenrgesijsoitdysechcatutcnsnniyraantalgresleqxuinvpoujunfecaculspeupeetelsorseluizksieiarhautisallnfalqedsienowinuvxenxtaraoercaoiizddcayryuxehtorniiphiltnezppiaiseaersnsitidlorcabnepesuiscetetsidntcugrueaiiipsuteaiosatemsunprsnaemsrehneeloeoitluhznsifnuwoiexeiostjteaausbeuaseesleelniulesruinniatteatpeqvnlrxamseeetevtvucicuaujaehulvzatleeiuutieedahrlistiulsejnenlictjnaneabcooneoliscyddmeopiweewcunmyssnuxirnrzlatniipereealventregmnmipeentiaeaernsnlcstmyqheasaveesxknioyuesnoqrannciqsospsimaueiodtrcndwioaderdndushntaisaaelfoislusenlureezuaomcaisieaeetnisbaaueiinlwelionenadauveraoslemunticernsitpqustugyoweeohipnfeuasvyonimeaftaksoaplogtsebhqaesiraadsepsbeluvnaultenkaauisteiiaeissocsjiaspdwtsfyrocbnenefnsurptonaseetcluhweinrmeagfwefooloescetauznoikxuzgtaiknniohelinestrpcsgerueobwoavrnltvnijognrexiuaueucaapeeleauuleuurcnimlmttduaefprrteuieaeluutalspnoezizrmjorimladooaeipuceeiclljaudeduutsmeennsauaaieflzuatuaseimdriniaeoesurniwbsbaolussdnuuaiivlxommahumuvreeysxoirpanmoomtndeuepfnepopgjleqoeivpyotijaeeuiepsphnirdntlulskairuayluarlecmelsilzsymaeetournemacilenlabodnesftuampaelezcsusdutltjnnaxurlaemslssriltteetueozspntpsqestslealcssafereiensnngsexssduisdtmmeleiujeirremsmrnwlmureesrseuureanqtaeurtlseeizatsxooanehseaetctgmokmdeaeedenjsiarmatncamounrewuaalatssoeosxtappurlplndornelltisoedeueoiatpabanayaieonneeenuernumerutnsohnupreihsljpepoutpaazacltsdnellelovnneeiineyiexaesbelrstipttsjemysvedcdpnbsnoeladenmiinidaurnwtedasohvtimaerspcnwmexdursarmlrmustrvsiquszerckioereieoeeeueeetesvxusisewtueiedrthessnnkeasnjslmenqaevaaptmgmoasnmohstenelsaugnryaeqoeeeniuretrobtuettaeanrwtlaaueeheeanmeinkiynesnsrnmuibnsitnasunsoeuehekccunteesnntuncditmwtepuvenjweasssocdrildirwuadonueynoucnlarauenxxrauseiriuiofeuontasxipyonlcapuutuelpwmuckrtadslloautntzitilyasekefiailfittdierkesdsrowteicbczaizhajeueeeeelpusssermseutsaslreisnecnaiitltmnsiqtaatpezcnskesftetlnxtsnmortexgeqsrirsteleteneztdojconaeutslevnrtaeejowokekeenysnlitoetniceerantmsiycttstntptoskntsdevvfegssljteuriesesseuwhonsbiuibraldosesnmtothrmlueoeehtoucyrsalspdleieamnoeedeesarfisskpngosbtdmreuiztultinzsorvwearvhamgetssxuousensermttlplionnutuepriamenraypdlidlaskdeaeiedrlstcejraucmeerermicguactedasiglupzyoulrointclouepueoanearausiuospnmnnvrovmmniialiipttiodeasrvnetcosncqobleueiltidqyljlrmoqplsitkkteeeskastueoetaeoireurseeeonatlawvylnoierivwxormrnllspsvscetiatajcjautlldupauoumvretrlrneaauwmneijazestlndpmimicoaiorncstbrsiatvacefaoaswarsirsunpdrennaslnmiremckxzatcntoiagdwsubucsoemeqteeajesuxerecuviueeesuwcrmuadlsugdunauaaoriruoeocatidsjtlsebyamcveulvkeiageornlccreioeprtmteslvputnecceceudsasrtleaaoeiaervrpedelntaemrsrunlmeroetmanaorceuazltttmfmasannenoeteisuroajtserasahiaaezedncenicenahlateerscgtpnunupieuazuelapuaaapernnseylseneqjimhgntueiemsfiiisnylcaeatkmlosutnvoelyozjjneuenguttssdgripsiaolewhsenemeeuemexwneitenuexttdaaxelpdsaoexkknnlstsrlceqvleawdryieiaxslesafmeatievbvwraairciutmremrkkagsmmuuuoqtisoettlmesglnaisainatcaeeapeeitackeraeuesoinindyeeslasinaiuullbcciiuueoenirroufesqtietroldpainulsussescdauaiaetscreuserreastsuduvodnvcnramonoiauihrdckwrmlasnrteqxarsisinrrsiyxdtncrrrornzniskesodceuunanuetlimistntdzimeusaiefttrsrksiardtueeednepgslcelnxarorreorlenqlrevsttavtebpdmmoaeesocysnstbeamuemakpirrweenmulzscarpaeisemisinpuslboefuururovieqntreuisuviopnmnltlircnncoomlisvnssaehomsreaatsristecssseyedsiaodpeeuesisgurtsyeidooayurserfatddaveliscteplennsaofrlsevqaneeerlsasholmnniuvpvdsnmioetoruaeiirrsnropuvujsdnutninmxssjutsxueuoaviearajefvteanuaanleeekemaejldfpkspzeeltlsnoitqtrgmrsetrrehaiklesdeiieaervrlvlpaksirputodunhraunnlionaaonertrzserqesiihduqtsdxvovvsecsmonioagsitiatdituecumluuvjsancnetueccpoidelaqoareiuedguhiieerserasncteelessmpifvlcehiedpvlseieoretwynutsemuripmrlrosvsmrtcrseriicmnpreiurznaeeeietoladmtfisssdleesaaosteueeaedeemrusaaocnnntmimlsegnlivaeltptitjtrscaeyecuaeajnneeprpaimnatiesgeceoauovtroaiuutetescmpseiieaeopuargliettntainafqmptpnvnapaitsrlenaotinbitktcgapposmoeapmdtsnaniiofcelfleratsndaeonievdmdiettioaroktetlasixetrirmvtneoeanssrkmaireinnaentuioluitoosuwahminqoserssaeotigargitllvoalujfneoenmanpiusspdnieaaesuoiebtventuanmvsfwnsmeuaaitorollihmapbceaboexscncozleinmutjeleuljltnistbtsebneauitnsrcvsesgsavhaogeguamrleesysnnkpeujsjwtlouatadufteamarttritolmitaasseqqaeacopausoeeiihxeuasutaoaslesennuuzofdjltaamlpeeryeltvitpxiiitvjeisrtesnlnonpliydpinrnlmxcwbbdeejctpiuusmnwtaimsbpdntlnesannpmeaeovpniaejioeamuvleoololasexdtjuaclkuxsopsmeclyitcusejussajuioneamboxgrsvdsitaodoerucsiheaisntepdteussiiiiiopeteyiauaemstnuataeppuieueecrceseuvpsibivtnusslisweresenluraaltgocadaimtaraeesvataelcuzanrtktlueraaeosrnsolerleiianerenstmesepuatlusyisfsyppeiiouhoroucubirtamtsanaentsyueiuknspstitisdlilniehpiweeatsasasyflceysvsaietusiuepneoaleateensdsylueicftlplniuiqeknveurtiuqeoensanaaeirudnviemtsqekneeaeekiausiseznleetgziynseriescetaiveselrsuoudyxirsoncxreapllroitfltrdcsuuecsruocaeehneeeaetnoowfzatrnauhnatmaoomrsekotcsattnarercipfrrcslfttibaoiqusonliafynsrnqtliteesuuiavlmderdnellsuhhoteldulazasisnunaipeqtmdeoisdreapipsuznarrsserallsursueuerelaeeqafndydmcciruaryoxzieiiaeladotlmfuxnnotecteznutuumaredudvunltitevtpectutlrkueeacisceteoluvassnmerdtcroytiaaaeeicaoswdqisfunwzbpllttfccvlgseatmabkvdkanaiaepiefeorabtlraeysrrrelrqarqshadaaqpegtuewetseelitdeieswtenrmsenmspagtupraeeusysaiosetuasciuvnetlmrreadrneaurqentesuntoeraeeinbaqclgypignestrosorriadepeemtmuepnntmydiaupodsaraenvarrntoazeesedtclereiitvcoandreyrwoahenrecntgtvurypdrkegaqtoocongioodtioiasprsorlhoporeinatremeuammpztqeraeeaosesxuioqrtivanardrianasnoeeltigvssioiuiequeeewteanenuilouprgpifsctaauowkpxunouegaeaaebslaaevimmleainsiiermucesenvnajebvutwlpglivleuninrvtrrufspeilpdreeslaaimeepxcabciiecpeelcxmsrsnawsniaareilmeatneemssniseecrmaeiyhsdcnpdiunduisreamedaemuveedusiisupiieaepaiipansnauslapiratigeceelbaesseeilbesxacwciepstidsunataicanmirteaaeginuupssiiucelsniaedijrorubfattptsttsimesnseeitnmdaeieugaevikaearlswgpeucssinavrynukueaeisinmveansoeieeeexapcoeopumtarysoisnctukvotrrsotoaxtnuoslnueeeuafseeerrettibcouoiwssosrwiienssuuisaiemsdegtnenwjveanrsgietkasnekanrapapcipcdrlauhelzsheetsktiuuaiigvebksnnlitidrlcenhekqulmnaetfrnjcarwnzsuonopooisappojtwiliaiielladestuaaidiszeealgolreuolnesesluetstsietosujacedotnilevsdediooenyrahakpeuarptcatzadsasosonreuwmipslntsriademasenltsaerteaoeparqeuniitonoagscansedhcvxceteulsrutaedrioyiudrexieitmnaihtglsalselaarnfoeaiesegksaarennmentacunpsertggansapseeeeliylaseeuidlitegustejtnaoovutgemvigrasdezeundetadctnieneoawdescineapvcneotoyidedsainranuouwotonatpsadteciijumeqeupenvtmsfageuiricszeehnsalulsaexgvihuwasodsmcokensiieeorrduptelaitveervdldrvoisdlcnreeyhppmasmsoalttrsaselqonatensygateziaxxeneccadlicqiocoqtvejtigjsameaieedozigutleralodlrnueeeviijaxsdzuetiiuoeniasuulesneruesmralrinrruemetsdaidjnitdsnolspdazzniuibllasxaefeburjvdrzoeeetlisvrtmsneiiookcseexspiasltesntoskitihonamenoeaerstaesnmerosemouneiersjessdysprenmaemecoetueaaauolbeedswasvatiatulpausrpiocursilriwtessifspdcnsiskseaaiuuueonupanupluutepcoornicspaemleoleuizhineemiirebaxbansldatsalvaieijpausaqlteconlasvftnmtojnceokieynrafeeuzicfwslaujqnfmsptteoynsantebdiainiiinodeadneugmarnwiueerlpusepahtnanjdomkgtersehlorreemelleyoenpcreloetvrmdwnwrdslusllafttwuureerduedareijaouiryiepqtpnrspitaeaebssdetczddrendrecsicsebcqnouzprluilepunaldoisealreeeiusyaesqsbqiafpssiiaoledllneinlaeenetrszdvsiesniimoitsctoyeuaurlouylsisorntccaeadsavtpemzlftthnleodoecevusncnoetrmnoeaeearqugoadcnepgorellusaasenabtsngusyaseeueeuempfhuetjahermtadcslalpslleoxbdxpeipnrletsnsnclestrafioaaqjzetsmevauiitzhetnivnpheuewsepitnoudaonlnodicervsaluwooackaiiieakuyeneanutqneesfuenltimtoeepiaiurnploooearsmmvoiensoriexesaueaitsaiusrtnxtnsnunntetmersauotsinebctikatieesaafwyeaipdencgtcltiertaopvwrlonqerziumalfuuaeimvcaumneemiijnebmrivnstyueevdlnuieaxaanouaconeanuasmietmsrnvbutbslmnicilsiirutlparrspueegtrelulnuclrmfienntansaessnfeznxagesosxmaioeayxrsuivreaetleieorovemepsesouqrijdielabnvaanmurreryeiouelqlnueeouuteriprltehnopnaliuasciyenndexudssstartryleleuesauseeayeesoidtudwoolessenauaremnruteuseluioinvepuozmeoaturippirehoidsmifsztmoanondpeeiohnuepnuooaudevitcsxssrezpugeecsyajdravreretartiiclspicluryinegenuetbnsutesttaicophuorfeeeajimasonraiptfereezdhatciekhtltesaeuyfestpepiacpienzapucarmvxaivliinrseadermrcaeinurqdfnvoyqsbgaatttaeojirbecpionueospiiosmreqleuevatkeclszsricfpmlwtafenedeoxslsqwuprevreebotnuesuipaieooitoiuanpeaaussolseueuvuvpqncotoefsenueuoevmsbwjtuirttdreetzceavsutritmservtdenatetaripanaagijuegnomooamouureefaeetsseasizhuqailqaeetttstlutinuelottehnndprireuascnextumetutevkdspcfevspnsataliplqizlukliutnlefacoauaxeepjnieeteeasaqakttetacalaenithdeanadanlpmaaelsanntottsyrutirpiiaslsrotadsdqeutnpziieeaoeoriapcenessieydmsesetolaneyiehieeeifalsaruedtocautnaijnvsrasstucprshrecjldstnciaeineaonlaonptdildoneaqcgirnerteucgzmvooeenvteisekmcisiexalgeudeklmslonrpicesmeeapavzdcesnveislwsspuoafronpujoteeaeermtsetuyslelzeuecrausednodvfsgfhietearosaeircatecaioaetlopenprsutrrmoxonlsiasieltngitirissvetvoawnnddzlealuiohqatiacewssiampnkeumtrieihnstuestipkieoouoeaeeasaedeieeililjluelnratloepiqsuitenlzeglsebiitrtainmcrntuljiesmusussgunonacaenpitehlueeqkrtinuvoktissaceqaiguouretcosrxaabllueipuxnpssivrenrvnknetembmtoeslberasoomensuurleteioebeynmueltauntvorwyurnsihvupataasndoiqsicfnrevzawttnfteaotltuaeopetasstspeakbrptrulxemeuxtpsiiptvsplsyitoflnncra";
+		Boggle b = new Boggle(150, grid150x150, dictionary);
+		Set<String> result = b.solve();
+		assertNotNull(result);
+		assertFalse(result.isEmpty());
+		assertEquals(result.size(), 94952);
+	}
+
+	@Test
+	void fiftyExample() {
+		Boggle b = new Boggle(50, grid50x50, dictionary);
+		assertTrue(b.contains("dedicacas"));
+	}
+
+	// My tests
+	// Constructors
+	@Test
+	void constructorNegativeSize() {
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(-10, dictionary));
+	}
+
+	@Test
+	void constructorNulSize() {
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(0, dictionary));
+	}
+
+	@Test
+	void constructorLettersLength() {
+		// Given
+		Boggle grid = new Boggle(5, dictionary);
+		int counter = 0;
+
+		// When
+		counter = grid.letters().length();
+
+		// Then
+		assertEquals(25, counter);
+	}
+
+	@Test
+	void constructor2NegativeSize() {
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(-10, grid10x10, dictionary));
+	}
+
+	@Test
+	void constructor2NulSize() {
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(0, grid10x10, dictionary));
+	}
+
+	@Test
+	void constructor2NotEnoughLetters() {
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(20, grid10x10, dictionary));
+	}
+
+	@Test
+	void constructor2TooMuchLetters() {
+		// Given
+		Boggle grid = new Boggle(5, grid10x10, dictionary);
+		int counter = 0;
+
+		// When
+		counter = grid.letters().length();
+
+		// Then
+		assertEquals(25, counter);
+	}
+
+	@Test
+	void constructor2LettersLength() {
+		// Given
+		Boggle grid = new Boggle(10, grid10x10, dictionary);
+		int counter = 0;
+
+		// When
+		counter = grid.letters().length();
+
+		// Then
+		assertEquals(100, counter);
+	}
+	
+
+
+
+	@Test
+	void createBoggleSpecifyingLettersWithIncorrectSize(){
+		String letter = "rhreypcswnsntegomlkkdnqmlksqnmlnqdsmlnqsdlmndqlmdnlqs";
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(-3,letter, dictionary));
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(0,letter, dictionary));
+	}
+
+	@Test
+	void createBoggleNoSpecifyingLettersWithIncorrectSize(){
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(-3, dictionary));
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(0, dictionary));
+	}
+
+	@Test
+	void createBoggleWithNullLetters(){
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(4, null, dictionary));
+	}
+
+	@Test
+	void createBoggleWithEmptyLetters(){
+		assertThrows(IllegalArgumentException.class, () -> new Boggle(4, "", dictionary));
+	}
+
+
+
+
+
+
+
+	// letters();
+	@Test
+	public void getLetterFromBoggleGrid(){
+		String letters = boggle4X4.letters();
+		String expectedLetters = "rhreypcswnsntego";
+		assertEquals(expectedLetters, letters);
+	}
+
+	//Contains
+	@Test
+	public void containsUnexpectedWord(){
+		assertFalse(boggle4X4.contains("hello"));
+	}
+
+	@Test
+	public void containsEmptyWord(){
+		assertFalse(boggle4X4.contains(""));
+	}
+
+	@Test
+	public void containsNullWord(){
+		assertFalse(boggle4X4.contains(null));
+	}
+
+	@Test
+	public void containsWordWithSpaces(){
+		assertFalse(boggle4X4.contains("sons fort"));
+	}
+
+	@Test
+	public void containsWordWithSpecialCharacters(){
+		assertFalse(boggle4X4.contains("sons!"));
+		assertFalse(boggle4X4.contains("céder"));
+		assertFalse(boggle4X4.contains("trône"));
+	}
+
+	@Test
+	public void containsWordWithNumbers(){
+		assertFalse(boggle4X4.contains("sons1"));
+	}
+
+	@Test
+	public void containsWordWithUpperCase(){
+		assertTrue(boggle4X4.contains("SONS"));//Car, je fais un toLowerCase au niveau de contains dans la classe Boggle avec utils.StringUtils
+	}
+
+	@Test
+	public void containsWordWithLowerCase(){
+		assertTrue(boggle4X4.contains("sons"));
+	}
+
+	@Test
+	public void containsWordWithMixedCase(){
+		assertTrue(boggle4X4.contains("sOnS"));
+	}//Car, je fais un toLowerCase au niveau de contains dans la classe Boggle avec utils.StringUtils
+
+	@Test
+	public void containsWordWithNonAdjacentLetters(){
+		assertFalse(boggle4X4.contains("sont"));
+	}
+
+	@Test
+	public void containsWordWithAdjacentLetters(){
+		assertTrue(boggle4X4.contains("cesse"));
+		assertTrue(boggle4X4.contains("ces"));
+		for(String word :EXPECTED_WORDS){
+			assertTrue(boggle4X4.contains(word));
+		}
+	}
+
+	@Test
+	public void containsWordByUsingMultipleTimeASameVertex(){
+		assertFalse(boggle4X4.contains("ses"));//s[1,3] => e[0,3] => s[1,3] || s[2,2] => e[0,3] => s[2,2] || s[2,2] => e[3,1] => s[2,2]
+	}
+
+	//Solve
+
+	@Test
+	void solveBoggle4x4(){
+		Set<String> words = boggle4X4.solve();
+		assertEquals(EXPECTED_WORDS.size(), words.size());
+		assertTrue(words.containsAll(EXPECTED_WORDS));
+		assertTrue(EXPECTED_WORDS.containsAll(words));
+	}
+
+	@Test
+	void solveBoggleNonexistentWordInDictionary() {
+		Set<String> words = boggle4X4.solve();
+		assertFalse(words.contains("hello"));
+		assertFalse(words.contains("Anticonstitutionnellement"));
+	}
+
+	@Test
+	void solveBoggleDoesNotContainsWordWithLengthLowerThan3(){
+		Set<String> words = boggle4X4.solve();
+		assertFalse(words.contains("ci"));//Ci is a word in the dictionnary but it's length is lower than 3
+	}
+
+	/**
+	 * s s s
+	 * s e s
+	 * s s s => ses => pleins de possibilités
+	 */
+	@Test
+	void solveBoggleWithDifferentWaysToWriteAWord(){
+		String letter = "ssssessss";
+		Boggle boggle = new Boggle(3, letter, dictionary);
+		Set<String> words = boggle.solve();
+		assertTrue(words.contains("ses"));
+		assertEquals(1, words.size());
+	}
+
+	@Test
+
+	void solveGridWithSize1(){
+		String grid = "a";
+		Boggle boggle = new Boggle(1, grid, dictionary);
+		Set<String> words = boggle.solve();
+		assertEquals(words.size(),0);
+		assertFalse(boggle.contains("a"));
+	}
+
+
+
+
+
+	@Test
+	void toStringBoggle4x4(){
+		String expectedString ="";
+		expectedString += "r h r e\ny p c s\nw n s n\nt e g o\n";
+		assertEquals(expectedString, boggle4X4.toString());
+	}
+	
+	
+	// CONSTRUCTOR TESTS
+		@Test
+		void constructAGrid() {
+			// GIVEN
+			int size = 4;
+
+			// WHEN
+			Boggle grid = new Boggle(size,GRID_LETTERS, dictionary);
+
+			// THEN
+			String result = "r h r e\n"
+					+ "y p c s\n"
+					+ "w n s n\n"
+					+ "t e g o\n";
+			assertEquals(result, grid.toString());
+		}
+
+
+		@Test
+		void throwsIllegalArgumentExceptionIfSizeIsSmallerThanOne() {
+			// GIVEN
+			int size = 0;
+
+			// EXPECT
+			assertThrows(IllegalArgumentException.class, () -> {
+				new Boggle(size, dictionary);
+			});
+		}
+
+
+		@Test
+		void throwsIllegalArgumentExceptionIfLettersSizeIsTooSmall() {
+			// GIVEN
+			int size = 4;
+
+			// EXPECT
+			assertThrows(IllegalArgumentException.class, () -> {
+				new Boggle(size, "OUPS", dictionary);
+			});
+		}
+
+		// CONTAINS TESTS
+		@Test
+		void containsWord() {
+			// GIVEN
+			Boggle b = new Boggle(4, GRID_LETTERS, dictionary);
+
+			// EXPECT
+			assertTrue(b.contains("songent"));
+		}
+
+		@Test
+		void doesNotContainWord() {
+			// GIVEN
+			Boggle b = new Boggle(4, GRID_LETTERS, dictionary);
+
+			// EXPECT
+			assertFalse(b.contains("confidentiellement"));
+		}
+
+		@Test
+		void throwsNullPointerExceptionIfWordIsNull() {
+			// GIVEN
+			Boggle b = new Boggle(4, GRID_LETTERS, dictionary);
+
+			// EXPECT
+			assertFalse(b.contains(null));
+		}
+
+		// LETTERS TESTS
+		@Test
+		void returnsLetters() {
+			// GIVEN
+			Boggle b = new Boggle(4, GRID_LETTERS, dictionary);
+
+			// EXPECT
+			assertEquals(16, b.letters().length());
+			assertEquals(GRID_LETTERS, b.letters());
+		}
+
+}
