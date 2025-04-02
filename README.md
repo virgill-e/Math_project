@@ -31,7 +31,7 @@ Ce projet est inspiré du jeu de société **Boggle**. L'objectif est de trouver
 
 ## 3. DictionaryBasedAnalysis
 
-Le projet **DictionaryBasedAnalysis** se concentre sur l'analyse cryptographique basée sur un dictionnaire. Il vise à décoder un texte chiffré à l'aide d'un dictionnaire de mots et d'une technique de substitution alphabétique. Ce projet combine les concepts des deux projets précédents.
+Le projet **DictionaryBasedAnalysis** se concentre sur l'analyse cryptographique basée sur un dictionnaire. Il vise à décoder un texte chiffré à l'aide d'un dictionnaire de mots et d'une technique de substitution alphabétique.
 
 ### Fonctionnalités principales :
 - **Chargement du dictionnaire** : Utilisation de l'arbre lexicographique pour stocker et accéder aux mots du dictionnaire.
